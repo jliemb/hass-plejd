@@ -1,3 +1,4 @@
 [submodule "pyplejd"]
 	path = pyplejd
-	url = https://github.com/thomasloven/pyplejd
+	url = https://github.com/jliemb/pyplejd
+
