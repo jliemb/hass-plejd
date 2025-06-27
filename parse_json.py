@@ -1,5 +1,5 @@
-from pyplejd.cloud import PlejdCloudSite, site_details as sd
-from pyplejd.interface import outputDeviceClass, inputDeviceClass, sceneDeviceClass
+from .pyplejd.cloud import PlejdCloudSite, site_details as sd
+from .pyplejd.interface import outputDeviceClass, inputDeviceClass, sceneDeviceClass
 import json
 import sys
 

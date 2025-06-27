@@ -1,7 +1,7 @@
 """Diagnostic support for Plejd."""
 
 from typing import TypeVar
-from pyplejdo import PlejdManager
+from .pyplejdo import PlejdManager
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
