@@ -14,6 +14,6 @@
   "integration_type": "hub",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/jliemb/hass_plejd/issues",
-  "loggers": ["pyplejd"],
+  "loggers": ["pyplejdo"],
   "version": "0.14.7"
 }

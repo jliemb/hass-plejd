@@ -5,7 +5,7 @@ PACKAGES = find_packages()
 VERSION = "0.14.7"
 
 setup(
-    name="pyplejd",
+    name="pyplejdo",
     packages=PACKAGES,
     version=VERSION,
     description="A python library for communicating with Plejd devices via bluetooth",
