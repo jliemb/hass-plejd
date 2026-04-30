@@ -3,6 +3,7 @@
 from homeassistant.core import callback, HomeAssistant
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers import device_registry as dr
+from homeassistant.const import EntityCategory
 
 from .const import DOMAIN, MANUFACTURER
 from .plejd_site import dt
@@ -24,14 +25,17 @@ class PlejdDeviceBaseEntity(Entity):
     @property
     def device_info(self):
         """Return a device description for device registry."""
-        return {
-            "identifiers": {(DOMAIN, *self.device.device_identifier)},
+        info = {
+            "identifiers": {(DOMAIN, self.device.device_identifier)},
             "name": self.device.name,
             "manufacturer": MANUFACTURER,
-            "model": self.device.hardware,
+            "model": f"{self.device.hardware}",
             "suggested_area": self.device.room,
             "sw_version": str(self.device.firmware),
         }
+        if not self.device.parent_identifier == self.device.device_identifier:
+            info["via_device"] = (DOMAIN, self.device.parent_identifier)
+        return info
 
     @property
     def unique_id(self):
@@ -70,6 +74,45 @@ class PlejdDeviceBaseEntity(Entity):
         return await super().async_will_remove_from_hass()
 
 
+class PlejdDeviceDiagnosticEntity(PlejdDeviceBaseEntity):
+    """Base class for a diagnostic entity"""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_has_entity_name = False
+    _id_suffix = "diagnostic"
+
+    @property
+    def device_info(self):
+        """Return a device description for device registry."""
+        info = super().device_info
+        info["connections"] = {(dr.CONNECTION_BLUETOOTH, self.device.ble_mac)}
+
+        return info
+
+    @property
+    def unique_id(self):
+        """Return unique identifier for the entity."""
+        return ":".join(self.device.identifier) + self._id_suffix
+
+    @property
+    def available(self):
+        return True
+
+    @callback
+    def _handle_update(self) -> None:
+        """When device state is updated from Plejd"""
+        pass
+
+    async def async_added_to_hass(self) -> None:
+        """When entity is added to hass."""
+
+        def _listener():
+            self._handle_update()
+            self.async_write_ha_state()
+
+        self.listener = self.device.hw.subscribe(_listener)
+
+
 @callback
 def register_unknown_device(
     hass: HomeAssistant, device: dt.PlejdDevice, config_entry_id: str
@@ -84,4 +127,5 @@ def register_unknown_device(
         model=device.hardware,
         suggested_area=device.room,
         sw_version=str(device.firmware),
+        connections={(dr.CONNECTION_BLUETOOTH, device.ble_mac)},
     )

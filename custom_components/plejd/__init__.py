@@ -21,6 +21,9 @@ PLATFORMS = [
     Platform.EVENT,
     Platform.BINARY_SENSOR,
     Platform.COVER,
+    Platform.SENSOR,
+    Platform.CLIMATE,
+    Platform.NUMBER,
 ]
 
 

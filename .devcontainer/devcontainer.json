@@ -4,7 +4,8 @@
     "postCreateCommand": "sudo -E container setup-dev",
     "containerEnv": {
       "DEVCONTAINER": "1",
-      "TZ": "Europe/Stockholm"
+      "TZ": "Europe/Stockholm",
+      "PYTHONPATH": "/usr/src/homeassistant:/workspaces/hass-plejd/pyplejd"
     },
     "forwardPorts": [8123],
     "mounts": [
@@ -26,9 +27,10 @@
           "editor.formatOnSave": true,
           "editor.formatOnType": true,
           "files.trimTrailingWhitespace": true,
-          "python.linting.pylintEnabled": false,
-          "python.linting.enabled": true,
-          "python.formatting.provider": "black"
+          "[python]": {
+            "editor.tabSize": 4,
+            "editor.defaultFormatter": "ms-python.black-formatter"
+          }
         }
       }
     },
