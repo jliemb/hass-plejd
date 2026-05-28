@@ -8,6 +8,7 @@ from collections import defaultdict
 from homeassistant.components import bluetooth
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.storage import Store
 
@@ -104,6 +105,9 @@ class PlejdSite:
                         adder(device, self)
                 registered_hw.add(device.hw)
 
+        if self.manager.data_from_api:
+            self._cleanup_stale_devices()
+
         # Close any stale connections that may be open
         for dev in self.devices:
             if dev.BLEaddress:
@@ -198,6 +202,32 @@ class PlejdSite:
         if self.stopping:
             return
         await self.manager.broadcast_time()
+
+    def _cleanup_stale_devices(self) -> None:
+        """Remove device registry entries no longer present in the Plejd API."""
+        if not self.devices:
+            return
+
+        current_identifiers = {
+            (DOMAIN, device.device_identifier)
+            for device in self.devices
+            if hasattr(device, "device_identifier")
+        }
+
+        device_registry = dr.async_get(self.hass)
+        stale_entries = [
+            entry
+            for entry in dr.async_entries_for_config_entry(
+                device_registry, self.config_entry.entry_id
+            )
+            if not any(ident in current_identifiers for ident in entry.identifiers)
+        ]
+
+        for entry in stale_entries:
+            _LOGGER.info(
+                "Removing stale Plejd device from registry: %s", entry.name
+            )
+            device_registry.async_remove_device(entry.id)
 
 
 def get_plejd_site_from_config_entry(
